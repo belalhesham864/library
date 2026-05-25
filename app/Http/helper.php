@@ -9,8 +9,8 @@ if (!function_exists('apiResponse')) {
         if ($data) {
             $responce['data'] = $data;
         }
-        return response()->json([
+        return response()->json(
             $responce
-        ], $status);
+        , $status);
     }
 }

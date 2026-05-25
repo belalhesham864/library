@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Requests\users;
+namespace App\Http\Requests\Auth;
 
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class UpdateuserRequest extends FormRequest
+class LoginRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,13 +22,9 @@ class UpdateuserRequest extends FormRequest
      */
     public function rules(): array
     {
-        $user=$this->route('user');
-        $id=is_object($user)? $user->id : $user;
-      return [
-            'name'=>'sometimes|string|min:5',
-            'email'=> 'sometimes|email|unique:users,email,'.$id,
-            'image'=>"sometimes|image|mimes:png,jpg,jpeg",
-            'password'=>'sometimes|min:8|confirmed'
+        return [
+            'email'=>'required|email|exists:users,email',
+            'password'=>'required'
         ];
     }
 }

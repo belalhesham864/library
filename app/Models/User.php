@@ -7,11 +7,12 @@ use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable,HasApiTokens;
 
     /**
      * The attributes that are mass assignable.
@@ -22,7 +23,9 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'email_verified_at'
+        'email_verified_at',
+        'image',
+        'status'
     ];
 
     /**
@@ -50,4 +53,6 @@ class User extends Authenticatable
     public function loans(){
         return $this->hasMany(Loans::class);
     }
+
+
 }
