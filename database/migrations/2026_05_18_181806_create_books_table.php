@@ -18,6 +18,7 @@ return new class extends Migration
             $table->text('description');
             $table->decimal('cost');
             $table->string('image');
+            $table->unsignedInteger('quantity')->default(0);
             $table->boolean('status')->default(1);
             $table->foreignId('category_id')->constrained('categories')->cascadeOnDelete();
             $table->softDeletes();

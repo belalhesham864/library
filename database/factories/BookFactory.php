@@ -25,6 +25,7 @@ class BookFactory extends Factory
             'slug'=>Str::slug($name),
            'description'=>fake()->paragraph(),
            'status'=> rand(0,1),
+           'quantity'=>fake()->randomElement([5,10]),
            'image' => 'https://picsum.photos/200/300?random=' . rand(1, 1000),
            'cost'=>fake()->randomElement([20,300]),
            'category_id'=>Category::inRandomOrder()->first()->id
