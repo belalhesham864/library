@@ -1,6 +1,9 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\User;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
 
 use App\Http\Requests\users\UserRequest;
 use App\Http\Requests\users\UpdateuserRequest;
@@ -8,13 +11,12 @@ use App\Http\Resources\UserCollection;
 use App\Http\Resources\UserResource;
 use App\Models\User;
 use App\Utils\ImageManger;
-use Illuminate\Http\Request;
+
 use Illuminate\Support\Facades\File;
 
-class UserController extends Controller
+class UserProfileController extends Controller
 {
-
-    public function show()
+     public function show()
     {
         $user = request()->user();
 
@@ -24,8 +26,7 @@ class UserController extends Controller
 
         return apiResponse(200, 'Success', new UserResource($user));
     }
-
-    public function update(UpdateuserRequest $request)
+        public function update(UpdateuserRequest $request)
     {
 
         $data = $request->validated();
@@ -43,11 +44,7 @@ class UserController extends Controller
         $user->update($data);
         return apiResponse(200, 'Updated Success', new UserResource($user));
     }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy()
+        public function destroy()
     {
         $user = request()->user();
         if (!$user) {

@@ -1,21 +1,21 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
 use App\Http\Requests\loans\LoanRequest;
 use App\Http\Requests\loans\UpdateLoanRequest;
 use App\Http\Resources\LoanCollection;
 use App\Http\Resources\LoanResource;
 use App\Models\Book;
 use App\Models\Loans;
-use Illuminate\Http\Request;
-
 class LoansController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+ public function index()
     {
         $loans=Loans::with(['user','book'])->select('id','user_id','book_id','due_date','loans_at','returned_at')->paginate(10);
      if($loans->isEmpty()){
@@ -23,7 +23,6 @@ class LoansController extends Controller
      }
      return apiResponse(200,'All Loans',(new LoanCollection($loans))->response()->getData());
     }
-
     /**
      * Show the form for creating a new resource.
      */
@@ -35,7 +34,7 @@ class LoansController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(LoanRequest $request)
+      public function store(LoanRequest $request)
     {
         $data=$request->validated();
         $loan=Loans::create($data);
@@ -48,7 +47,7 @@ class LoansController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show($id)
+      public function show($id)
     {
         $loan=Loans::with(['user','book'])->find($id);
          if (!$loan) {
@@ -61,7 +60,7 @@ class LoansController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Loans $loans)
+    public function edit(string $id)
     {
         //
     }
@@ -69,29 +68,16 @@ class LoansController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateLoanRequest $request, $id)
+    public function update(Request $request, string $id)
     {
-       $data=$request->validated();
-   
-          $loan=Loans::with(['user','book'])->find($id);
-         if (!$loan) {
-            return apiResponse(404, 'Not Found');
-        }
-      $loan->update($data);
-       
-        return apiResponse(200,'data updated Successfuly',new LoanResource($loan->fresh()));
+        //
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy($id)
+    public function destroy(string $id)
     {
-                $loan=Loans::find($id);
-         if (!$loan) {
-            return apiResponse(404, 'Not Found');
-        }
-        $loan->delete();
-        return apiResponse(200,'Deleted Success');
+        //
     }
 }

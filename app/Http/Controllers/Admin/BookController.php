@@ -1,6 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
+
+use App\Http\Controllers\Controller;
 
 use App\Http\Requests\Book\BookRequest;
 use App\Http\Requests\Book\UpdateBookRequest;
@@ -11,13 +13,12 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
 
-
 class BookController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+       public function index()
     {
         $books = Book::with('category')->active()->select('id', 'name', 'slug', 'category_id', 'cost', 'description', 'image', 'status')
             ->activeCategry()
@@ -39,7 +40,7 @@ class BookController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(BookRequest $request)
+        public function store(BookRequest $request)
     {
         $data = $request->validated();
         if ($request->hasFile('image')) {
@@ -59,7 +60,7 @@ class BookController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show($id)
+       public function show($id)
     {
         $book = Book::with('category')->find($id);
 
@@ -72,7 +73,7 @@ class BookController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Book $book)
+    public function edit(string $id)
     {
         //
     }
@@ -108,7 +109,7 @@ class BookController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy($id)
+     public function destroy($id)
     {
         $book = Book::find($id);
         if (!$book) {
@@ -123,7 +124,7 @@ class BookController extends Controller
         $book->forceDelete();
         return apiResponse(200, 'Deleted Successfully');
     }
-    public function archive($id)
+        public function archive($id)
     {
         $book = Book::find($id);
         if (!$book) {
@@ -132,7 +133,7 @@ class BookController extends Controller
         $book->delete();
         return apiResponse(200, 'Book Aechived Successfully');
     }
-    public function return($id)
+        public function return($id)
     {
         $book = Book::withTrashed()->find($id);
         if (!$book) {

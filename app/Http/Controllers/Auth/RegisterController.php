@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\RegisterRequest;
 use App\Http\Resources\UserResource;
+use App\Jobs\sandOtpRegister;
 use App\Models\User;
 use App\Notifications\SendOtpEmailNotification;
 use App\Utils\ImageManger;
@@ -28,7 +29,7 @@ class RegisterController extends Controller
                 $user->image = ImageManger::uploadImage($request);
                 $user->save();
             }
-     $user->notify(new SendOtpEmailNotification());
+         sandOtpRegister::dispatch($user);
             $token = $user->createToken('register')->plainTextToken;
             DB::commit();
             return apiResponse(201, 'User Register Success', ['user' => new UserResource($user), 'token' => $token]);

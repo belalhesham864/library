@@ -8,6 +8,8 @@ use App\Http\Resources\LoanResource;
 use App\Models\Book;
 use App\Models\Loans;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class UserLoanController extends Controller
 {
@@ -25,29 +27,45 @@ class UserLoanController extends Controller
 
     public function store(Request $request)
     {
-        $book_id=$request->book_id;
-        $user = request()->user();
-        $book = Book::find($book_id);
-        if (!$book) {
-            return apiResponse(404, 'Not Found');
-        }
-        if ($book->quantity < 1) {
-            return apiResponse(400, 'the Book Not Available Now');
-        }
-        $userloaned = Loans::where('book_id', $book_id)->where('user_id', $user->id)->whereNull('returned_at')->exists();
-        if ($userloaned) {
-            return apiResponse(400, 'You Already Have This Book');
-        }
-        $loan=Loans::create([
-            'user_id'=>$user->id,
-            'book_id'=>$book_id,
-            'loans_at'=>now(),
-            'due_date'=>$request->due_date
+
+        $request->validate([
+            'book_id'  => 'required|exists:books,id',
+            'due_date' => 'required|date|after:today',
         ]);
-                $book->decrement('quantity');
-  return apiResponse(201, 'Book Loaned Successfully', new LoanResource($loan));
+        try {
+
+            DB::beginTransaction();
+            $book_id = $request->book_id;
+            $user = request()->user();
+            $book = Book::find($book_id);
+            if (!$book) {
+                return apiResponse(404, 'Not Found');
+            }
+            if ($book->quantity < 1) {
+                return apiResponse(400, 'the Book Not Available Now');
+            }
+            $userloaned = Loans::where('book_id', $book_id)->where('user_id', $user->id)->whereNull('returned_at')->exists();
+            if ($userloaned) {
+                return apiResponse(400, 'You Already Have This Book');
+            }
+
+
+            $loan = Loans::create([
+                'user_id' => $user->id,
+                'book_id' => $book_id,
+                'loans_at' => now(),
+                'due_date' => $request->due_date
+            ]);
+            $book->decrement('quantity');
+            DB::commit();
+            return apiResponse(201, 'Book Loaned Successfully', new LoanResource($loan));
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Loans Error : ' . $e->getMessage());
+            return apiResponse(500, 'Inrenal Server Error');
+        }
     }
-        public function return($id)
+    public function return($id)
     {
         $user = request()->user();
 
@@ -57,14 +75,12 @@ class UserLoanController extends Controller
             return apiResponse(404, 'Loan Not Found or Already Returned');
         }
 
-  
+
         $loan->update(['returned_at' => now()]);
 
-        
+
         $loan->book->increment('quantity');
 
         return apiResponse(200, 'Book Returned Successfully', new LoanResource($loan->fresh()->load('book')));
     }
 }
-
-

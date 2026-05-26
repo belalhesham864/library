@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Controller;
 use App\Http\Requests\category\CategoryRequest;
 use App\Http\Requests\category\UpdateCategoryRequest;
 use App\Http\Resources\CategoryCollection;
@@ -9,7 +10,6 @@ use App\Http\Resources\CategoryResource;
 use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
-
 class CategoryController extends Controller
 {
     /**
@@ -35,7 +35,7 @@ class CategoryController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(CategoryRequest $request)
+     public function store(CategoryRequest $request)
     {
         $data = $request->validated();
         $data['slug'] = Str::slug($data['title']);
@@ -44,7 +44,7 @@ class CategoryController extends Controller
         if (!$category) {
             return apiResponse(400, 'Please Try again');
         }
-        return apiResponse(201, 'Data Created Successfuly', new CategoryResource($category->fresh()));
+        return apiResponse(201, 'Category Created Successfuly', new CategoryResource($category->fresh()));
     }
 
     /**
@@ -58,11 +58,10 @@ class CategoryController extends Controller
         }
         return apiResponse(200, "Category details", new CategoryResource($category));
     }
-
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Category $category)
+    public function edit(string $id)
     {
         //
     }
@@ -70,7 +69,9 @@ class CategoryController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateCategoryRequest $request, $id)
+  
+
+        public function update(UpdateCategoryRequest $request, $id)
     {
         $data = $request->validated();
         if (empty($data)) {
@@ -87,10 +88,7 @@ class CategoryController extends Controller
         return apiResponse(200, 'Updated Successfully', new CategoryResource($category->fresh()));
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy($id)
+       public function destroy($id)
     {
         $category = Category::find($id);
 
