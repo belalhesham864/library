@@ -8,6 +8,7 @@ use App\Http\Requests\category\UpdateCategoryRequest;
 use App\Http\Resources\CategoryCollection;
 use App\Http\Resources\CategoryResource;
 use App\Models\Category;
+use App\Services\Admin\CategoryService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 class CategoryController extends Controller
@@ -15,9 +16,11 @@ class CategoryController extends Controller
     /**
      * Display a listing of the resource.
      */
+           public function __construct(private CategoryService $categorySer){}
+
     public function index()
     {
-        $categories = Category::select('id', 'title', 'status', 'slug', 'description', 'created_at')->active()->paginate(10);
+        $categories =$this->categorySer->index();
         if ($categories->isEmpty()) {
             return apiResponse(404, 'Not Found');
         }
@@ -37,10 +40,10 @@ class CategoryController extends Controller
      */
      public function store(CategoryRequest $request)
     {
-        $data = $request->validated();
-        $data['slug'] = Str::slug($data['title']);
-        $category = Category::create($data);
 
+        $data = $request->validated();
+    $category=$this->categorySer->create($data);
+       
         if (!$category) {
             return apiResponse(400, 'Please Try again');
         }
@@ -52,7 +55,7 @@ class CategoryController extends Controller
      */
     public function show($id)
     {
-        $category = Category::where('id', $id)->select('id', 'title', 'status', 'slug', 'description', 'created_at')->active()->first();
+        $category = $this->categorySer->show($id);
         if (!$category) {
             return apiResponse(404, 'Category Not Found');
         }
@@ -73,30 +76,23 @@ class CategoryController extends Controller
 
         public function update(UpdateCategoryRequest $request, $id)
     {
-        $data = $request->validated();
-        if (empty($data)) {
-            return apiResponse(422, 'No data provided');
+    try{
+          $data = $request->validated();
+      $category= $this->categorySer->update($data,$id);
+        return apiResponse(200, 'Updated Successfully', new CategoryResource($category));
+        }catch(\Exception $e){
+            return apiResponse($e->getCode(),$e->getMessage());
         }
-        $category = Category::find($id);
-        if (!$category) {
-            return apiResponse(404, 'Category Not Found');
-        }
-        if ($request->has('title')) {
-            $data['slug'] = Str::slug($request->title);
-        }
-        $category->update($data);
-        return apiResponse(200, 'Updated Successfully', new CategoryResource($category->fresh()));
     }
 
        public function destroy($id)
     {
-        $category = Category::find($id);
+        try{
+     $this->categorySer->destroy($id);
 
-        if (!$category) {
-            return apiResponse(404, 'Category Not Found');
-        }
-
-        $category->delete();
-        return apiResponse(200, 'Deleted Successfully');
+             return apiResponse(200, 'Deleted Successfully');
+            }catch(\Exception $e){
+                return apiResponse($e->getCode(),$e->getMessage());
+            }
     }
 }

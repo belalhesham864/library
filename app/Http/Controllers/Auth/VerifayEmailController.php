@@ -4,34 +4,27 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\UserResource;
-use App\Notifications\SendOtpEmailNotification;
+use App\Services\Auth\VerifyEmailService;
 use Ichtrojan\Otp\Otp;
 use Illuminate\Http\Request;
-use Override;
 
 class VerifayEmailController extends Controller
 {
-    public $otp;
-    public function __construct()
+    public function __construct(private VerifyEmailService $verifyEmailService) {}
+    public function verifay(Request $request)
     {
-        $this->otp=new Otp();
-      
+        $request->validate(['token' => 'required']);
+        try {
+
+            $user = $this->verifyEmailService->verify($request->token, request()->user());
+            return apiResponse(200, 'Email Verifaied Success', new UserResource($user));
+        } catch (\Exception $e) {
+            return apiResponse($e->getCode(), $e->getMessage());
+        }
     }
-    public function verifay(Request $request){
-     $request->validate(['token'=>'required']);
-    $user=request()->user();
-  
-    $token=$request->token;
-    $check=$this->otp->validate($user->email,$token);
-    if($check->status==false){
-        return apiResponse(400,'Otp is Invailed');
-    }
-    $user->update(['email_verified_at'=>now()]);
-    return apiResponse(200,'Email Verifaied Success',new UserResource($user));
-    }
-    public function sendOtAgain(){
-         $user=request()->user();
-         $user->notify(new SendOtpEmailNotification);
-        return apiResponse(200,'Otp send Successfuly');
+    public function sendOtAgain()
+    {
+        $this->verifyEmailService->resend(request()->user());
+        return apiResponse(200, 'Otp send Successfuly');
     }
 }

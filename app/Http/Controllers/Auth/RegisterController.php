@@ -8,35 +8,29 @@ use App\Http\Resources\UserResource;
 use App\Jobs\sandOtpRegister;
 use App\Models\User;
 use App\Notifications\SendOtpEmailNotification;
+use App\Services\Auth\RegisterService;
 use App\Utils\ImageManger;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use Override;
 
 class RegisterController extends Controller
 {
+
+    public function __construct(private RegisterService $registerSer) {}
     public function register(RegisterRequest $request)
     {
         try {
-            $request->validated();
-            DB::beginTransaction();
-            $user = User::create($request->except('image','password_confirmation'));
-            if (!$user) {
-                return apiResponse(400, 'Please try again');
-            }
-            if ($request->hasFile('image')) {
-                $user->image = ImageManger::uploadImage($request);
-                $user->save();
-            }
-         sandOtpRegister::dispatch($user);
-            $token = $user->createToken('register')->plainTextToken;
-            DB::commit();
-            return apiResponse(201, 'User Register Success', ['user' => new UserResource($user), 'token' => $token]);
+            $data = $request->validated();
+
+            $data = $this->registerSer->register($request, $data);
+            return apiResponse(201, 'User Register Success', ['user' => new UserResource($data['user']), 'token' => $data['token']]);
         } catch (\Exception $e) {
-            DB::rollBack();
+
             Log::error('Register Error : ' . $e->getMessage());
-            return apiResponse(500, 'Inrenal Server Error');
+            return apiResponse($e->getCode(), $e->getMessage());
         }
     }
 }

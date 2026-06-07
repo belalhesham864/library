@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\UserCollection;
 use App\Http\Resources\UserResource;
 use App\Models\User;
+use App\Services\Admin\UsersService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
 
@@ -14,10 +15,11 @@ class UserController extends Controller
     /**
      * Display a listing of the resource.
      */
+           public function __construct(private UsersService $userService){}
+
       public function index()
     {
-        $users = User::select('id', 'name', 'email', 'created_at')
-            ->paginate(10);
+        $users =$this->userService->index();
 
         if ($users->isEmpty()) {
             return apiResponse(404, 'No Users Found');
@@ -46,7 +48,7 @@ class UserController extends Controller
      * Display the specified resource.
      */    public function show($id)
     {
-        $user = User::find($id);
+        $user = $this->userService->show($id);
 
         if (!$user) {
             return apiResponse(404, 'User Not Found');

@@ -83,7 +83,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('user')->group(function () {
         Route::controller(UserProfileController::class)->group(function () {
             Route::get('/profile', 'show');
-            Route::put('/profile', 'update');
+            Route::post('/profile', 'update');
             Route::delete('/profile', 'destroy');
         });
         Route::controller(UserLoanController::class)->group(function () {

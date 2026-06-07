@@ -4,6 +4,7 @@ namespace App\Http\Requests\loans;
 
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Override;
 
 class LoanRequest extends FormRequest
 {
@@ -23,10 +24,17 @@ class LoanRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'user_id'=>"required|exists:users,id",
             'book_id'=>'required|exists:books,id',
-            'loans_at'=>'required|date',
-            'due_date'=>'required|date|after:loans_at',
+            'due_date'=>'required|date|after:today',
+        ];
+    }
+    public function messages()
+    {
+        return [
+            'book_id.required'=>"You must select the book you want",
+            'book_id.exists'=>' Sorry , The selected book does not exist',
+            'due_date.required'=>'You must enter Date of retrieval',
+            'due_date'=>'retrieval date must be after day '
         ];
     }
 }

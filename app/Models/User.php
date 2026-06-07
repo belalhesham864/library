@@ -53,6 +53,9 @@ class User extends Authenticatable
     public function loans(){
         return $this->hasMany(Loans::class);
     }
-
+public function getImageAttribute($value)
+{
+    return asset($value);
+}
 
 }

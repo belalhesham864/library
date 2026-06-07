@@ -6,29 +6,28 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
+use App\Services\Auth\LoginService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
 class LoginController extends Controller
 {
-    public function login(LoginRequest $request){
-         $request->validated();
-         $user=User::whereEmail($request->email)->first();
-         if(!$user){
-             return apiResponse(401, 'Invalid credentials');
-         }
+    public function __construct(private LoginService $loginService) {}
 
-         if(!Hash::check($request->password,$user->password)){
-               return apiResponse(401, 'Invalid credentials');
-         }
-          $token = $user->createToken('login')->plainTextToken;
+    public function login(LoginRequest $request)
+    {
+        $data = $request->validated();
+        try {
 
-          return apiResponse(200,'Login Success', ['user'=>new UserResource($user),'token'=>$token]);
+            $result = $this->loginService->login($data);
+            return apiResponse(200, 'Login Success', ['user' => new UserResource($result['user']), 'token' => $result['token']]);
+        } catch (\Exception $e) {
+            return apiResponse($e->getCode(), $e->getMessage());
+        }
     }
-    public function logout(){
-        $user=request()->user();
-
-        $user->currentAccessToken()->delete();
-         return apiResponse(200,'Logout Successfuly');
+    public function logout()
+    {
+        request()->user()->currentAccessToken()->delete();
+        return apiResponse(200, 'Logout Successfuly');
     }
 }

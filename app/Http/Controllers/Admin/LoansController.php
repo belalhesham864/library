@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Services\Admin\LoanService;
 use Illuminate\Http\Request;
 use App\Http\Requests\loans\LoanRequest;
 use App\Http\Requests\loans\UpdateLoanRequest;
@@ -15,9 +16,11 @@ class LoansController extends Controller
     /**
      * Display a listing of the resource.
      */
+           public function __construct(private LoanService $loanService){}
+
  public function index()
     {
-        $loans=Loans::with(['user','book'])->select('id','user_id','book_id','due_date','loans_at','returned_at')->paginate(10);
+        $loans=$this->loanService->index();
      if($loans->isEmpty()){
         return apiResponse(404,'NOt Found Loans');
      }
@@ -37,7 +40,7 @@ class LoansController extends Controller
       public function store(LoanRequest $request)
     {
         $data=$request->validated();
-        $loan=Loans::create($data);
+        $loan=$this->loanService->create($data);
         if(!$loan){
              return apiResponse(400, 'Please Try again');
         }
@@ -49,7 +52,7 @@ class LoansController extends Controller
      */
       public function show($id)
     {
-        $loan=Loans::with(['user','book'])->find($id);
+        $loan=$this->loanService->show($id);
          if (!$loan) {
             return apiResponse(404, 'Not Found');
         }

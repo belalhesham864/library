@@ -22,12 +22,12 @@ class UpdateuserRequest extends FormRequest
      */
     public function rules(): array
     {
-        $user=$this->route('user');
-        $id=is_object($user)? $user->id : $user;
+    $id = request()->user()->id;
+
       return [
             'name'=>'sometimes|string|min:5',
             'email'=> 'sometimes|email|unique:users,email,'.$id,
-            'image'=>"sometimes|image|mimes:png,jpg,jpeg",
+            'image'=>"sometimes|image|mimes:png,jpg,jpeg,tmp",
             'password'=>'sometimes|min:8|confirmed'
         ];
     }
