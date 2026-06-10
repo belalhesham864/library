@@ -10,17 +10,16 @@ class PorfileService
     /**
      * Create a new class instance.
      */
-    public function __construct(private PorfileRepository $porfileRepo){}
 
     public function update($data,$user,$request){
             if ($request->hasFile('image')) {
             $data['image'] = ImageManger::update($request, $user, 'uploads/users');
         }
-        return $this->porfileRepo->update($user,$data);
+      $user->update($data);
+     return $user;
     }
     public function destroy($user){
         ImageManger::delete($user);
-        return $this->porfileRepo->destroy($user);
-    }
+   return $user->delete();    }
 
 }

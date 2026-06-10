@@ -23,13 +23,14 @@ use Illuminate\Support\Facades\Route;
 
 /////////////////////////// Authontaction/////////////////////
 Route::prefix('auth')->group(function () {
-    Route::post('/register', [RegisterController::class, 'register']);
+    Route::post('/register', [RegisterController::class, 'register'])->middleware('throttle:register');
     Route::controller(LoginController::class)->group(function () {
-        Route::post('/login', 'login');
-        Route::delete('/logout', 'logout')->middleware('auth:sanctum');
+        Route::post('/login', 'login')->middleware('throttle:login');
+        Route::get('/me', 'me')->middleware('auth:api');
+        Route::delete('/logout', 'logout')->middleware('auth:api');
     });
 
-    Route::middleware('auth:sanctum')->prefix('email/verifay')->controller(VerifayEmailController::class)->group(function () {
+    Route::middleware('auth:api')->prefix('email/verifay')->controller(VerifayEmailController::class)->group(function () {
         Route::post('/', 'verifay');
         Route::get('/sendotp', 'sendOtAgain');
     });
@@ -79,7 +80,7 @@ Route::prefix('admin/')->group(function () {
 
 ///////////////////////////////////// User ///////////////////////
 
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware('auth:api')->group(function () {
     Route::prefix('user')->group(function () {
         Route::controller(UserProfileController::class)->group(function () {
             Route::get('/profile', 'show');
@@ -88,7 +89,7 @@ Route::middleware('auth:sanctum')->group(function () {
         });
         Route::controller(UserLoanController::class)->group(function () {
             Route::get('/loans', 'index');
-            Route::post('/loans', 'store');
+            Route::post('/loans', 'store')->middleware('throttle:loans');
             Route::put('/loans/{id}/return', 'return');
         });
     });

@@ -3,6 +3,7 @@
 namespace App\Services\Auth;
 
 use App\Jobs\sandOtpRegister;
+use App\Models\User;
 use App\Repositories\Auth\RegisterRepository;
 use App\Utils\ImageManger;
 
@@ -11,16 +12,15 @@ class RegisterService
     /**
      * Create a new class instance.
      */
-    public function __construct(private RegisterRepository $registerRepo){}
     public function register($request,$data){
          $path=  ImageManger::uploadImage($request,'uploads/users');
           $data['image']=$path;
-       $user=$this->registerRepo->register($data);
+       $user=User::create($data);;
          if (!$user) {
                 return throw new \Exception("Please try again",400);
             }
               sandOtpRegister::dispatch($user);
-            $token = $user->createToken('register')->plainTextToken;
+            $token =auth()->login($user);
                 return ['user' => $user, 'token' => $token];
 
     }

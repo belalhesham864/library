@@ -2,7 +2,9 @@
 
 namespace App\Services\Auth;
 
+use App\Models\User;
 use App\Repositories\Auth\LoginRepository;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
 class LoginService
@@ -10,16 +12,18 @@ class LoginService
     /**
      * Create a new class instance.
      */
-    public function __construct(private LoginRepository  $loginRepo){}
     public function login($data){
-        $user=$this->loginRepo->findUser($data);
+        $user=User::whereEmail($data['email'])->first();
         if(!$user){
      throw new \Exception('Not Found',404);
         }
-           if(!Hash::check($data['password'],$user->password)){
-          throw new \Exception( 'Invalid credentials',401);
-         }
-    $token = $user->createToken('login')->plainTextToken;
+
+        $token=Auth::guard('api')->attempt($data);
+        if(!$token){
+        throw new \Exception( 'Unauthorized',401);
+        }
+
     return ['user' => $user, 'token' => $token];
+    
     }
 }

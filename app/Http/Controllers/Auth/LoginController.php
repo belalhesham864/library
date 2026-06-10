@@ -8,6 +8,7 @@ use App\Http\Resources\UserResource;
 use App\Models\User;
 use App\Services\Auth\LoginService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
 class LoginController extends Controller
@@ -27,7 +28,11 @@ class LoginController extends Controller
     }
     public function logout()
     {
-        request()->user()->currentAccessToken()->delete();
+       auth()->logout();
         return apiResponse(200, 'Logout Successfuly');
+    }
+    public function me(){
+        $user=Auth::user();
+        return apiResponse(200,$user);
     }
 }

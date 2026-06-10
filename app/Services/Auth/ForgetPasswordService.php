@@ -2,6 +2,7 @@
 
 namespace App\Services\Auth;
 
+use App\Models\User;
 use App\Notifications\ForgetpasswordNotification;
 use App\Repositories\Auth\LoginRepository;
 use Ichtrojan\Otp\Otp;
@@ -11,13 +12,13 @@ class ForgetPasswordService
     /**
      * Create a new class instance.
      */
-    public function __construct(private LoginRepository $loginrepo,  private Otp $otp)
+    public function __construct(  private Otp $otp)
     {
         //
     }
 
     public function forgetPassword($data){
-        $user=$this->loginrepo->findUser($data);
+        $user=User::whereEmail($data['email'])->first();
           if(!$user){
              throw new \Exception('User Not Found',404);
             
@@ -26,13 +27,11 @@ class ForgetPasswordService
     }
      public function checkOtp($data, $token)
     {
-           $user = $this->loginrepo->findUser($data['email']);
+           $user = User::whereEmail($data)->first();
 
     if (!$user) {
         throw new \Exception('User Not Found', 404);
     }
-
-      
 
         $check = $this->otp->validate($user->email, $token);
 

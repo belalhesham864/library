@@ -12,9 +12,10 @@ class ResetPasswordController extends Controller
 {
 
     public function __construct(private ResetPasswordService $resetPasswordService) {}
-public function reset(Request $request){
-        $request->validate(['password'=>'required|confirmed|min:8','email'=>'required|exists:users,email']);
-  try {
+    public function reset(Request $request)
+    {
+        $request->validate(['password' => 'required|confirmed|min:8', 'email' => 'required|exists:users,email']);
+        try {
             $this->resetPasswordService->reset($request->email, $request->password);
             return apiResponse(200, 'Password Changed Successfully');
         } catch (\Exception $e) {

@@ -2,30 +2,32 @@
 
 namespace App\Services\Admin;
 
+use App\Models\Book;
 use App\Repositories\Admin\BookRepository;
 use App\Utils\ImageManger;
 use Illuminate\Support\Str;
  
 class BookService{
-   public function __construct(private BookRepository $bookrepo){}
 
    public function index(){
-   return $this->bookrepo->index();
+   return  Book::with('category')->active()->select('id', 'name', 'slug', 'category_id', 'cost', 'description', 'image', 'status')
+            ->activeCategry()
+            ->paginate(10);
 
    }
    public function store($data,$request){
        $data['image']=ImageManger::uploadImage($request,'uploads/books');
         $data['slug'] = Str::slug($data['name']);
-   return $this->bookrepo->store($data);
+   return Book::create($data);
 
    }
 
    public function show($id){
-    return $this->bookrepo->show($id);
+    return  Book::with('category')->find($id);
    }
 
    public function updated($request,$data,$id){
-    $book=$this->bookrepo->find($id);
+    $book=Book::find($id);
     if(!$book){
         throw new \Exception('Not Found',404);
     }
@@ -36,33 +38,35 @@ class BookService{
                 $data['slug'] = Str::slug($data['name']);
 
     }
-        return $this->bookrepo->update($book, $data);
+ $book->update($data);
+    return $book;
 
    }
 
    public function destroy($id){
-    $book=$this->bookrepo->find($id);
+    $book=Book::find($id);
     if(!$book){
         throw new \Exception('Not Found',404);
     }
    ImageManger::delete($book);
-    return $this->bookrepo->destroy($book);
+    return $book->forceDelete();
    }
 
    public function archive($id){
 
-    $book=$this->bookrepo->find($id);
+    $book=Book::find($id);
   if(!$book){
         throw new \Exception('Not Found',404);
     }
-    return $this->bookrepo->delete($book);
+    return   $book->delete();
    }
    public function return($id){
-    $book=$this->bookrepo->findTrashed($id);
+    $book=Book::onlyTrashed()->find($id);
     if(!$book){
         throw new \Exception('Not Found',404);
     }
-        return $this->bookrepo->return($book);
+         $book->restore();
+          return $book;
 
    }
 }
