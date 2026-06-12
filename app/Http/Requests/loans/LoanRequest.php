@@ -24,8 +24,8 @@ class LoanRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'user_id'=>"required|exists:users,id",
-            'loans_at'=>'required',
+            // 'user_id'=>"required|exists:users,id",
+            // 'loans_at'=>'required',
             'book_id'=>'required|exists:books,id',
             'due_date'=>'required|date|after:today',
         ];

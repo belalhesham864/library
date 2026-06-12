@@ -37,8 +37,7 @@ class AppServiceProvider extends ServiceProvider
             });
         });
         RateLimiter::for('loans', function (Request $request) {
-            dd($request->user());
-            return Limit::perMinute(1)->by($request->user()?->id ?: $request->ip())->response(function () {
+            return Limit::perHour(3)->by($request->user()?->id ?: $request->ip())->response(function () {
                 return apiResponse(429, 'Try again After 60 munites');
             });
         });

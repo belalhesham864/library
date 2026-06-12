@@ -20,7 +20,7 @@ class LoansController extends Controller
 
  public function index()
     {
-        $loans=$this->loanService->index();
+        $loans=Loans::with(['user','book'])->select('id','user_id','book_id','due_date','loans_at','returned_at')->paginate(10);
      if($loans->isEmpty()){
         return apiResponse(404,'NOt Found Loans');
      }
@@ -40,7 +40,7 @@ class LoansController extends Controller
       public function store(LoanRequest $request)
     {
         $data=$request->validated();
-        $loan=$this->loanService->create($data);
+        $loan=Loans::create($data);
         if(!$loan){
              return apiResponse(400, 'Please Try again');
         }
@@ -52,7 +52,7 @@ class LoansController extends Controller
      */
       public function show($id)
     {
-        $loan=$this->loanService->show($id);
+        $loan=Loans::with(['user','book'])->find($id);
          if (!$loan) {
             return apiResponse(404, 'Not Found');
         }

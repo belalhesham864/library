@@ -18,6 +18,7 @@ class Book extends Model
         'description',
         'cost',
         'image',
+        'pdf',
         'status',
         'category_id',
     ];
@@ -28,6 +29,12 @@ class Book extends Model
     }
         public function loans(){
         return $this->hasMany(Loans::class);
+    }
+        public function reservations(){
+        return $this->hasMany(reservations::class);
+    }
+        public function reviews(){
+        return $this->hasMany(ReviewBook::class);
     }
           public function scopeActive($q){
  $q->where('status',1);

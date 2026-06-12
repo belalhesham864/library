@@ -21,7 +21,12 @@ class BookResource extends JsonResource
             'status'=>$this->status,
             'description'=>$this->description,
             'cost'=>$this->cost,
+            'pdf'=>$this->pdf,
+
             'image'=>asset($this->image),
+            'reviews' => $this->reviews,
+            'avg_rating'=>$this->reviews->avg('rating'),
+            'count'=>$this->reviews->count(),
             'category'=>new CategoryResource($this->category)
         ];
     }

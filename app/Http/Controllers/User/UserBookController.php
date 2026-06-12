@@ -5,6 +5,7 @@ namespace App\Http\Controllers\User;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\BookCollection;
 use App\Http\Resources\BookResource;
+use App\Models\Book;
 use App\Services\User\BookService;
 use Illuminate\Http\Request;
 
@@ -12,11 +13,11 @@ class UserBookController extends Controller
 {
 
 
-    public function __construct(private BookService $bookService) {}
 
     public function index()
     {
-        $books = $this->bookService->index();
+        $books = Book::select('id', 'name', 'slug', 'image', 'status', 'cost', 'description', 'category_id')
+            ->active()->activeCategry()->paginate(10);
         if ($books->isEmpty()) {
             return apiResponse(404, 'Not Found Books');
         }
@@ -24,11 +25,13 @@ class UserBookController extends Controller
     }
 
     public function show($id)
-    {
-        $book = $this->bookService->show($id);
+    {   
+        $book =  Book::select('id', 'name', 'slug', 'image', 'status', 'cost', 'description', 'category_id')
+            ->active()->find($id);
         if (!$book) {
             return apiResponse(404, 'Not Found Book');
         }
         return apiResponse(200, 'Book', new BookResource($book));
     }
+
 }

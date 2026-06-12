@@ -5,7 +5,7 @@ namespace App\Http\Requests\Book;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class BookRequest extends FormRequest
+class ReviewRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,15 +22,10 @@ class BookRequest extends FormRequest
      */
     public function rules(): array
     {
-          return [
-            'name' => 'required|string|max:255|unique:books,name',
-          
-            'description' => 'required|string',
-            'cost' => 'required|numeric|min:0',
-            'pdf'=>"required|file",
-            'image' => 'required|image|mimes:jpg,jpeg,png',
-         
-            'category_id' => 'required|exists:categories,id',
+        return [
+            'book_id'=>'required|exists:books,id',
+            'comment'=>'nullable|string',
+            'rating'=>'required|integer|between:1,5'
         ];
     }
 }

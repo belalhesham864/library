@@ -11,15 +11,12 @@ use Illuminate\Support\Facades\Hash;
 class ResetPasswordController extends Controller
 {
 
-    public function __construct(private ResetPasswordService $resetPasswordService) {}
     public function reset(Request $request)
     {
-        $request->validate(['password' => 'required|confirmed|min:8', 'email' => 'required|exists:users,email']);
-        try {
-            $this->resetPasswordService->reset($request->email, $request->password);
+       $data= $request->validate(['password' => 'required|confirmed|min:8', 'email' => 'required|exists:users,email']);
+        $user = User::where('email', $data['email'])->first();
+            $user->update(['password' => Hash::make($data['password'])]);
             return apiResponse(200, 'Password Changed Successfully');
-        } catch (\Exception $e) {
-            return apiResponse($e->getCode(), $e->getMessage());
-        }
+     
     }
 }

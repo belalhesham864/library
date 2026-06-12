@@ -15,11 +15,12 @@ class UserController extends Controller
     /**
      * Display a listing of the resource.
      */
-           public function __construct(private UsersService $userService){}
+    public function __construct(private UsersService $userService) {}
 
-      public function index()
+    public function index()
     {
-        $users =$this->userService->index();
+        $users = User::select('id', 'name', 'email', 'created_at')
+                        ->paginate(10);
 
         if ($users->isEmpty()) {
             return apiResponse(404, 'No Users Found');
@@ -48,8 +49,7 @@ class UserController extends Controller
      * Display the specified resource.
      */    public function show($id)
     {
-        $user = $this->userService->show($id);
-
+        $user = User::select('id', 'name', 'email', 'created_at')->find($id);
         if (!$user) {
             return apiResponse(404, 'User Not Found');
         }
@@ -78,17 +78,15 @@ class UserController extends Controller
      */
     public function destroy(string $id)
     {
-           $user = User::find($id);
+        $user = User::find($id);
 
         if (!$user) {
             return apiResponse(404, 'User Not Found');
         }
-         if ($user->image && File::exists(public_path($user->image))) {
+        if ($user->image && File::exists(public_path($user->image))) {
             File::delete(public_path($user->image));
         }
         $user->delete();
         return apiResponse(200, 'Deleted Success');
-
-
     }
 }

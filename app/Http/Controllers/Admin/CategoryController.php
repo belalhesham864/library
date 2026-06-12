@@ -20,7 +20,7 @@ class CategoryController extends Controller
 
     public function index()
     {
-        $categories =$this->categorySer->index();
+        $categories =Category::select('id', 'title', 'status', 'slug', 'description', 'created_at')->active()->paginate(10);
         if ($categories->isEmpty()) {
             return apiResponse(404, 'Not Found');
         }
@@ -42,7 +42,8 @@ class CategoryController extends Controller
     {
 
         $data = $request->validated();
-    $category=$this->categorySer->create($data);
+         $data['slug']=str::slug($data['title']);
+        $category=Category::create($data);
        
         if (!$category) {
             return apiResponse(400, 'Please Try again');
@@ -55,7 +56,7 @@ class CategoryController extends Controller
      */
     public function show($id)
     {
-        $category = $this->categorySer->show($id);
+        $category = Category::where('id', $id)->select('id', 'title', 'status', 'slug', 'description', 'created_at')->active()->first();
         if (!$category) {
             return apiResponse(404, 'Category Not Found');
         }
@@ -78,8 +79,19 @@ class CategoryController extends Controller
     {
     try{
           $data = $request->validated();
-      $category= $this->categorySer->update($data,$id);
-        return apiResponse(200, 'Updated Successfully', new CategoryResource($category));
+   if(empty($data)){
+           throw new \Exception('not found data',400); 
+        }
+        $category=Category::find($id);
+        if(!$category){
+           throw new \Exception('not found category',404); 
+        }
+        if($data['title']){
+            $data['slug']= $data['title'];
+        }
+
+        $category->update($data);
+                return apiResponse(200, 'Updated Successfully', new CategoryResource($category));
         }catch(\Exception $e){
             return apiResponse($e->getCode(),$e->getMessage());
         }
@@ -88,10 +100,14 @@ class CategoryController extends Controller
        public function destroy($id)
     {
         try{
-     $this->categorySer->destroy($id);
-
-             return apiResponse(200, 'Deleted Successfully');
-            }catch(\Exception $e){
+ $category=Category::find($id);
+         if(!$category){
+        throw new \Exception('Not Found',404);
+    }
+        $category->delete();
+       return apiResponse(200, 'Deleted Successfully');
+    }
+            catch(\Exception $e){
                 return apiResponse($e->getCode(),$e->getMessage());
             }
     }

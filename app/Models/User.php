@@ -68,6 +68,9 @@ class User extends Authenticatable implements JWTSubject
     public function loans(){
         return $this->hasMany(Loans::class);
     }
+    public function reviews(){
+        return $this->hasMany(ReviewBook::class);
+    }
 public function getImageAttribute($value)
 {
     return asset($value);

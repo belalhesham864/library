@@ -8,6 +8,7 @@ use App\Http\Resources\UserResource;
 use App\Jobs\sandOtpRegister;
 use App\Models\User;
 use App\Notifications\SendOtpEmailNotification;
+use App\services\Auth\RegiserServies;
 use App\Services\Auth\RegisterService;
 use App\Utils\ImageManger;
 use Illuminate\Http\Request;
@@ -18,19 +19,9 @@ use Override;
 
 class RegisterController extends Controller
 {
-
-    public function __construct(private RegisterService $registerSer) {}
-    public function register(RegisterRequest $request)
+    
+    public function register(RegisterRequest $request,RegiserServies $Register)
     {
-        try {
-            $data = $request->validated();
-
-            $data = $this->registerSer->register($request, $data);
-            return apiResponse(201, 'User Register Success', ['user' => new UserResource($data['user']), 'token' => $data['token']]);
-        } catch (\Exception $e) {
-
-            Log::error('Register Error : ' . $e->getMessage());
-            return apiResponse($e->getCode(), $e->getMessage());
-        }
+       return $Register->Register($request);
     }
 }

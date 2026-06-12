@@ -9,24 +9,32 @@ use App\Http\Controllers\Admin\BookController;
 use App\Http\Controllers\Admin\CategoryController;
 
 use App\Http\Controllers\Admin\LoansController;
+use App\Http\Controllers\User\ReviewController;
 use App\Http\Controllers\User\UserBookController;
 use App\Http\Controllers\User\UserCategoryController;
 use App\Http\Controllers\User\UserLoanController;
 use App\Http\Controllers\User\UserProfileController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\User\SearchBookController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 
 
-
+ Route::get('/me', function(){
+            return apiResponse(200,'Success',auth()->user());
+        })->middleware('auth:api');
 
 /////////////////////////// Authontaction/////////////////////
 Route::prefix('auth')->group(function () {
-    Route::post('/register', [RegisterController::class, 'register'])->middleware('throttle:register');
+    Route::post('/register', [RegisterController::class, 'register'])
+    // ->middleware('throttle:register')
+    ;
     Route::controller(LoginController::class)->group(function () {
-        Route::post('/login', 'login')->middleware('throttle:login');
-        Route::get('/me', 'me')->middleware('auth:api');
+        Route::post('/login', 'login')
+        // ->middleware('throttle:login')
+        ;
+       
         Route::delete('/logout', 'logout')->middleware('auth:api');
     });
 
@@ -89,9 +97,16 @@ Route::middleware('auth:api')->group(function () {
         });
         Route::controller(UserLoanController::class)->group(function () {
             Route::get('/loans', 'index');
-            Route::post('/loans', 'store')->middleware('throttle:loans');
+            Route::post('/loans', 'store')
+            ->middleware('throttle:loans');
             Route::put('/loans/{id}/return', 'return');
+            Route::get('/download/{id}', 'download');
+            Route::get('/reseve/{id}', 'reseve');
+            Route::get('/cancelreseve/{id}', 'cancelreseve');
+            
         });
+        Route::post('search',[SearchBookController::class,'search']);
+        Route::post('review',[ReviewController::class,'review']);
     });
     Route::controller(UserCategoryController::class)->group(function () {
         Route::get('categories', 'index');
@@ -99,6 +114,6 @@ Route::middleware('auth:api')->group(function () {
     });
     Route::controller(UserBookController::class)->group(function () {
         Route::get('books', 'index');
-        Route::get('books/{id}', 'show');
+        Route::get('books/{id}', 'show')->name('books.show');
     });
 });
